@@ -27,6 +27,15 @@ class Sudoku
     @sudoku_board[row][column]
   end
 
+  def all_coordinates_in_row(row)
+    raise 'Row out of bounds' unless (0..8).to_a.include?(row)
+    coords = []
+    for index in 0..8 do
+      coords << [row, index]
+    end
+    coords
+  end
+
 end
 
 my_game = Sudoku.new("000070408000401397409820065068007040740109082090600730280016903631502000909040000")
@@ -37,3 +46,6 @@ puts my_game.display_board
 # p my_game.show_value(4,3) == 1
 # p my_game.show_value(6,6) == 9
 # p my_game.show_value(7,4) == 0
+p my_game.all_coordinates_in_row(1) == [[1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7], [1,8]]
+# p my_game.all_coordinates_in_row(9) #=> raise error
+
