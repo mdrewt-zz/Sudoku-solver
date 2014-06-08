@@ -56,12 +56,16 @@ class Sudoku
 
   def solve!
     changed = true
-    while changed
+    empty_cells = []
 
+    while changed
+      empty_cells = []
       changed = false
+
       @sudoku_board.map!.with_index do |row, row_index|
         row.map!.with_index do |column, column_index|
           if column == 0
+            empty_cells << [row_index, column_index]
             possibilities = (1..9).to_a
             all_coords = all_coordinates(row_index, column_index)
             used = used_numbers(all_coords[0], all_coords[1], all_coords[2])
@@ -75,8 +79,9 @@ class Sudoku
           column
         end
       end
-
     end
+
+    puts "#{empty_cells}" if empty_cells.length > 0
   end
 
 end
