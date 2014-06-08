@@ -19,7 +19,7 @@ class Sudoku
       board_string << "\n"
     end
     board_string << "-"*21
-    board_string
+    return board_string
   end
 
   def get_empty_cells(sboard)
@@ -30,7 +30,7 @@ class Sudoku
         empty_cells << [row_index, column_index] if value == 0
       end
     end
-    empty_cells
+    return empty_cells
   end
 
   def all_coordinates(row, column)
@@ -44,7 +44,7 @@ class Sudoku
       col_coords << [index, column]
       box_coords << [(row/3)*3 + index/3, (column/3)*3 + index%3]
     end
-    [row_coords, col_coords, box_coords]
+    return [row_coords, col_coords, box_coords]
   end
 
   def used_numbers(all_coordinates)
@@ -52,11 +52,59 @@ class Sudoku
     all_coordinates.each do |section|
       section.each { |coord| used << (@sudoku_board[coord[0]][coord[1]]) }
     end
-    used.uniq
+    return used.uniq
+  end
+
+  def possible_numbers(all_coordinates)
+    possibilities = (0..9).to_a
+    used = used_numbers(all_coordinates)
+    used.each { |num| possibilities.delete(num) }
+    return possibilities
   end
 
   def solve!
-    @sudoku_board = by_elimination(@sudoku_board)
+    sboard = @sudoku_board 
+    sboard = by_elimination(sboard)
+    empty_cells = get_empty_cells(sboard)
+    sboard = by_common_possibles(sboard) if empty_cells.length > 0
+    @sudoku_board = sboard
+  end
+
+  def by_common_possibles(sboard)
+    changed = true
+    while changed == true
+      puts "begin"
+      changed = false
+      empty_cells = get_empty_cells(sboard)
+      empty_cells.each do |empty_coord|
+        all_coords = all_coordinates(empty_coord[0], empty_coord[1])
+        row_coords = all_coords[0]
+        empty_row_coords = []
+        row_coords.each do |coord|
+          empty_row_coords << coord if sboard[coord[0]][coord[1]] == 0
+        end
+        possibilities_counter = Hash.new
+        for num in 1..9 do 
+          possibilities_counter[num] = 0 
+        end
+        empty_row_coords.each do |coords|
+          all_coords = all_coordinates(coords[0], coords[1])
+          possibilities = possible_numbers(all_coords)
+
+          possibilities.each do |num| 
+            possibilities_counter[num] += 1 
+          end
+
+          if possibilities_counter.has_value?(1)
+            possibilities_counter.each do |number, occurances|
+              sboard[coords[0]][coords[1]] = number if occurances == 1
+              changed == true
+            end
+          end
+        end
+      end
+    end
+    return sboard
   end
 
   def by_elimination(sboard)
@@ -65,22 +113,19 @@ class Sudoku
       changed = false
       empty_cells = get_empty_cells(sboard)
       empty_cells.each do |coords|
-        possibilities = (1..9).to_a
         all_coords = all_coordinates(coords[0], coords[1])
-        used = used_numbers(all_coords)
-        used.each { |num| possibilities.delete(num) }
+        possibilities = possible_numbers(all_coords)
         if possibilities.length == 1
           sboard[coords[0]][coords[1]] = possibilities.first
           changed = true
         end
      end
     end
-    sboard
+    return sboard
   end
-
 end
 
-my_game = Sudoku.new("000070408000401397409820065068007040740109082090600730280016903631502000909040000")
+#my_game = Sudoku.new("000070408000401397409820065068007040740109082090600730280016903631502000909040000")
 # p "000070408000401397409820065068007040740109082090600730280016903631502000909040000".length => 81
 # puts my_game.display_board
 # p my_game.show_value(0,0) == 0
@@ -97,7 +142,7 @@ my_game = Sudoku.new("0000704080004013974098200650680070407401090820906007302800
 # p my_game.used_numbers([[1,3], [1,5], [1,6], [1,7], [1,8]]) == [4, 1, 3, 9, 7]
 # my_game.solve!
 # puts my_game.display_board
-# my_game = Sudoku.new("000689100800000029150000008403000050200005000090240801084700910500000060060410000")
+my_game = Sudoku.new("000689100800000029150000008403000050200005000090240801084700910500000060060410000")
 puts my_game.display_board
 my_game.solve!
 puts my_game.display_board
