@@ -27,13 +27,18 @@ class Sudoku
     @sudoku_board[row][column]
   end
 
-  def all_coordinates_in_row(row)
+  def all_coordinates(row, column)
     raise 'Row out of bounds' unless (0..8).to_a.include?(row)
-    coords = []
+    raise 'Column out of bounds' unless (0..8).to_a.include?(column)
+    row_coords = []
+    col_coords = []
+    box_coords = []
     for index in 0..8 do
-      coords << [row, index]
+      row_coords << [row, index]
+      col_coords << [index, column]
+      box_coords << [(row/3)*3 + index/3, (column/3)*3 + index%3]
     end
-    coords
+    return [row_coords, col_coords, box_coords]
   end
 
 end
@@ -46,6 +51,12 @@ puts my_game.display_board
 # p my_game.show_value(4,3) == 1
 # p my_game.show_value(6,6) == 9
 # p my_game.show_value(7,4) == 0
-p my_game.all_coordinates_in_row(1) == [[1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7], [1,8]]
+# p my_game.all_coordinates_in_row(1) == [[1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7], [1,8]]
 # p my_game.all_coordinates_in_row(9) #=> raise error
+coords = my_game.all_coordinates(1,8)
+p coords[0] == [[1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7], [1,8]] # row
+p coords[1] == [[0,8], [1,8], [2,8], [3,8], [4,8], [5,8], [6,8], [7,8], [8,8]] # column
+p coords[2] == [[0,6], [0,7], [0,8], [1,6], [1,7], [1,8], [2,6], [2,7], [2,8]] # box
+
+
 
